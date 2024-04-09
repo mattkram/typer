@@ -466,7 +466,7 @@ def _print_commands_panel(
     commands: List[click.Command],
     markup_mode: MarkupMode,
     console: Console,
-    cmd_len: int,
+    cmd_len: Union[int, None] = None,
 ) -> None:
     t_styles: Dict[str, Any] = {
         "show_lines": STYLE_COMMANDS_TABLE_SHOW_LINES,
@@ -639,13 +639,12 @@ def rich_format_help(
                 panel_to_commands[panel_name].append(command)
 
         # Identify the longest command name in all panels
-        max_cmd_len = max(
-            [
-                len(command.name or "")
-                for commands in panel_to_commands.values()
-                for command in commands
-            ]
-        )
+        command_lengths = [len(command.name or "") for commands in panel_to_commands.values() for command in commands]
+        if command_lengths:
+            max_cmd_len = max(command_lengths)
+        else:
+            # If there are no commands, use the rich table default via None
+            max_cmd_len = None
 
         # Print each command group panel
         default_commands = panel_to_commands.get(COMMANDS_PANEL_TITLE, [])
